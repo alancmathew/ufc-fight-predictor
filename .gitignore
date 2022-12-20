@@ -4,3 +4,4 @@ data/
 credentials.json
 misc/
 nbs/dataCollection.ipynb
+nbs/dataParsing.ipynb
