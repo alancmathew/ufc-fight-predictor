@@ -1,0 +1,6 @@
+data/
+.ipynb_checkpoints/
+.DS_Store
+credentials.json
+misc/
+nbs/dataCollection.ipynb
