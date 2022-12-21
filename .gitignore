@@ -5,3 +5,4 @@ credentials.json
 misc/
 nbs/dataCollection.ipynb
 nbs/dataParsing.ipynb
+src/dataCollection.py
