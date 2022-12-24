@@ -144,7 +144,7 @@ def save_pages(urls: list[str], outfolderdir: str) -> None:
                     break
                 session = httpx.Client()
             finally:
-                time.sleep(random.randint(10000, 20000)/1000)
+                time.sleep(random.randint(5000, 10000)/1000)
         else:
             reached_not_downloaded = False
 
