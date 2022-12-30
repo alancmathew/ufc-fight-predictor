@@ -31,6 +31,15 @@ dir_dict["upcoming_eventlist_html"] = os.path.join(dir_dict["upcoming_html"], "e
 dir_dict["upcoming_events_html"] = os.path.join(dir_dict["upcoming_html"], "events")
 dir_dict["upcoming_fights_html"] = os.path.join(dir_dict["upcoming_html"], "fights")
 
+def write_list_to_file(thelist: list[str], filepath: str) -> None:
+    with open(filepath, "w") as f:
+        for item in thelist:
+            f.write(f"{item}\n")
+            
+def read_list_from_file(filepath: str) -> list[str]:
+    with open(filepath, "r") as f:
+        return f.read().splitlines()
+
     
 def save_html(html_str: str, filename: str, folderpath: str = dir_dict["html"]) -> None:
     os.makedirs(folderpath, exist_ok=True)
@@ -75,57 +84,30 @@ def sequential_filename_from_url(url):
         filename = "page_01.html"
 
     return filename
-        
-def download_sequential_pages(first_url: str, folderpath: str = dir_dict["html"]) -> None:
-    with httpx.Client() as session:
-        filename = sequential_filename_from_url(first_url)
-        
-        assert(filename)
-        assert(first_url)
-        html = download_get_html(first_url, filename, folderpath, session)
-        soup = BeautifulSoup(html, features="lxml")
-
-        page_links = soup.find_all("a", class_="b-statistics__paginate-link")
-
-        page_nums = [a.text.strip() for a in page_links]
-        
-        for idx, num in enumerate(page_nums):
-            try:
-                page_nums[idx] = int(num)
-            except ValueError:
-                page_nums.remove(num)
-
-        num_pages = max(page_nums)
-        
-        
-        if num_pages != 1:
-            inter = "&" if "?" in first_url else "?"
-            for page_num in tqdm(range(2, num_pages+1)):
-                if "page=1" in first_url:
-                    url = first_url.replace("page=1", f"page={page_num}")
-                else:
-                    url = f"{first_url}{inter}page={page_num}"
-                filename = sequential_filename_from_url(url)
-                if not os.path.exists(os.path.join(folderpath, filename)):
-                    _ = download_get_html(url, filename, folderpath, session)
-                    time.sleep(random.randint(5000, 10000)/1000)
                     
                     
-def save_pages(urls: list[str], folderpath: str) -> None:
+def save_pages(urls: list[str], folderpath: str, filenames: list[str] = None) -> None:
     fail_score = 0
     reached_not_downloaded = False
     session = httpx.Client()
-    for idx, url in enumerate(tqdm(urls)):
+    iterator = zip(urls, filenames) if filenames else urls
+    for idx, val in enumerate(tqdm(iterator)):
         if reached_not_downloaded and (idx != 0) and (idx%25 == 0):
             session.close()
             time.sleep(random.randint(60000, 300000)/1000)
             print("Switching session")
             session = httpx.Client()
-        unique_id = os.path.split(url)[1]
-        if not os.path.exists(os.path.join(folderpath, f"{unique_id}.html")):
+            
+        if len(val) == 2:
+            url, filename = val
+        else:
+            url = val
+            unique_id = os.path.split(url)[1]
+            filename = f"{unique_id}.html"
+        if not os.path.exists(os.path.join(folderpath, filename)):
             reached_not_downloaded = True
             try:
-                download_get_html(url, f"{unique_id}.html", folderpath, session)
+                download_get_html(url, filename, folderpath, session)
                 if fail_score > 0:
                     fail_score -= 1
             except:
@@ -142,14 +124,47 @@ def save_pages(urls: list[str], folderpath: str) -> None:
             reached_not_downloaded = False
             
             
-def write_list_to_file(thelist: list[str], filepath: str) -> None:
-    with open(filepath, "w") as f:
-        for item in thelist:
-            f.write(f"{item}\n")
+def download_sequential_pages(first_url: str, folderpath: str = dir_dict["html"]) -> None:
+    
+    filename = sequential_filename_from_url(first_url)
+
+    assert(filename)
+    assert(first_url)
+    filepath = os.path.join(folderpath, filename)
+    if not os.path.exists(filepath):
+        html = download_get_html(first_url, filename, folderpath)
+    else:
+        with open(filepath, "r") as fh:
+            html = fh.read()
             
-def read_list_from_file(filepath: str) -> list[str]:
-    with open(filepath, "r") as f:
-        return f.read().splitlines()
+    soup = BeautifulSoup(html, features="lxml")
+
+    page_links = soup.find_all("a", class_="b-statistics__paginate-link")
+
+    page_nums = [a.text.strip() for a in page_links]
+
+    for idx, num in enumerate(page_nums):
+        try:
+            page_nums[idx] = int(num)
+        except ValueError:
+            page_nums.remove(num)
+
+    num_pages = max(page_nums)
+
+    if num_pages != 1:
+        urls, filenames = [], []
+        inter = "&" if "?" in first_url else "?"
+        for page_num in tqdm(range(2, num_pages+1)):
+            if "page=1" in first_url:
+                url = first_url.replace("page=1", f"page={page_num}")
+            else:
+                url = f"{first_url}{inter}page={page_num}"
+            filename = sequential_filename_from_url(url)
+            urls.append(url)
+            filenames.append(filename)
+            
+        save_pages(urls, folderpath, filenames)
+                    
 
 def format_filename(file):
     filename = file.replace(".html", "")
@@ -167,6 +182,7 @@ def format_filename(file):
                 break
                 
     return f"{newfilename}.html"
+
 
 def format_sequential_filenames(folderpath):
     files = sorted(lfilter(lambda s: s.endswith(".html"), \
