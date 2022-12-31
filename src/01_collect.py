@@ -166,10 +166,12 @@ class FightsCollector:
     
     def get_fight_urls(self):
         self.completed_fight_urls_list = \
-            self.save_fight_urls(dir_dict["completed_events_html"], "completed_fight_urls.csv")
+            self.save_fight_urls(dir_dict["completed_events_html"], 
+                                 "completed_fight_urls_weightclasses.csv")
         
         self.upcoming_fight_urls_list = \
-            self.save_fight_urls(dir_dict["upcoming_events_html"], "upcoming_fight_urls.csv")
+            self.save_fight_urls(dir_dict["upcoming_events_html"], 
+                                 "upcoming_fight_urls_weightclasses.csv")
         
     def save_fight_pages(self):
         save_pages(self.completed_fight_urls_list, dir_dict["completed_fights_html"])
@@ -292,7 +294,7 @@ class FightsCollector:
     def get_fight_dict(self): 
         completed_fights_dict_list = \
                         self.all_fight_data_extractor(dir_dict["completed_fights_html"])
-        filepath = os.path.join(dir_dict["raw_json"], "completed_fights_data.json")
+        filepath = os.path.join(dir_dict["raw_json"], "completed_fights.json")
         with open(filepath, "w") as f:
             json.dump(completed_fights_dict_list, f, indent=4)
             
@@ -337,7 +339,7 @@ class FightsCollector:
     def save_fight_df(self):
         completed_fights_lod = self.get_fight_dict()
         fights_df = self.fight_dicts_to_df(completed_fights_lod)
-        filepath = os.path.join(dir_dict["raw_csv"], "completed_fights_data.csv")
+        filepath = os.path.join(dir_dict["raw_csv"], "completed_fights.csv")
         fights_df.to_csv(filepath, index=False)
     
     def start(self):
@@ -479,11 +481,11 @@ def start_collectors():
     
     print("\nCompleted Fights Collector\n")
 
-#     fighters_collector = FightersCollector()
+    fighters_collector = FightersCollector()
 
-#     fighters_collector.start()
+    fighters_collector.start()
     
-#     print("\nCompleted Fighters Collector\n")
+    print("\nCompleted Fighters Collector\n")
 
 
 # In[8]:

@@ -15,8 +15,8 @@ dir_dict = dict()
 
 dir_dict["data"] = "../data/"
 dir_dict["raw"] = os.path.join(dir_dict["data"], "raw")
-dir_dict["mid"] = os.path.join(dir_dict["data"], "mid")
-dir_dict["clean"] = os.path.join(dir_dict["data"], "mid")
+dir_dict["clean"] = os.path.join(dir_dict["data"], "clean")
+dir_dict["preprocessed"] = os.path.join(dir_dict["data"], "preprocessed")
 dir_dict["raw_csv"] = os.path.join(dir_dict["raw"], "csv")
 dir_dict["raw_json"] = os.path.join(dir_dict["raw"], "json")
 dir_dict["html"] = os.path.join(dir_dict["raw"], "html")
@@ -30,6 +30,7 @@ dir_dict["completed_fights_html"] = os.path.join(dir_dict["completed_html"], "fi
 dir_dict["upcoming_eventlist_html"] = os.path.join(dir_dict["upcoming_html"], "eventlist")
 dir_dict["upcoming_events_html"] = os.path.join(dir_dict["upcoming_html"], "events")
 dir_dict["upcoming_fights_html"] = os.path.join(dir_dict["upcoming_html"], "fights")
+
 
 def write_list_to_file(thelist: list[str], filepath: str) -> None:
     with open(filepath, "w") as f:
@@ -199,10 +200,36 @@ def format_sequential_filenames(folderpath):
             f.write(content)
 
         os.remove(filepath)
+        
+        
+class ColumnTracker:
+    def __init__(self, init_list):
+        self.main_list = init_list
+        self.print_num_left()
+        
+    def remove(self, to_remove):
+        if not isinstance(to_remove, list):
+            to_remove = [to_remove]
+            
+        for col in to_remove:
+            if col in self.main_list:
+                self.main_list.remove(col)
+            
+        self.print_num_left()
+        
+    def list_left(self):
+        return self.main_list
+    
+    def num_left(self):
+        return len(self.main_list)
+    
+    def print_num_left(self):
+        print(f"Remaining columns: {len(self.main_list)}")
+        
 
 def main():
     for folderpath in dir_dict.values():
         os.makedirs(folderpath, exist_ok=True)
     
-if __name__ == "__main__":
-    main()
+
+main()
