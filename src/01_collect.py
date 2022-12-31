@@ -33,7 +33,7 @@ from utilities import *
 
 # ## Events
 
-# In[ ]:
+# In[4]:
 
 
 class EventsCollector:
@@ -100,7 +100,7 @@ class EventsCollector:
         
         self.upcoming_events_df = \
                 self.get_eventlist_df(dir_dict["upcoming_eventlist_html"], 
-                                      "upcoming_event.csv")
+                                      "upcoming_events.csv")
 
         
     def save_event_pages(self):
@@ -119,7 +119,7 @@ class EventsCollector:
 
 # ## Fights
 
-# In[ ]:
+# In[5]:
 
 
 class FightsCollector:
@@ -319,13 +319,13 @@ class FightsCollector:
                     var = f"{key}_SS" if data_header == "Significant Strikes" else key
                     fight_dict[f"{fighter_order[(i % 2)]}_{round_order[i]}_{var}"] = v
 
-            fight_dict_keys = fight_dict.keys()
-            additional_data_headers = ["Totals", "Significant Strikes"]
-            for data_header in additional_data_headers:
-                if data_header in fight_dict_keys:
-                    merge_additional_data(data_header)
+        fight_dict_keys = fight_dict.keys()
+        additional_data_headers = ["Totals", "Significant Strikes"]
+        for data_header in additional_data_headers:
+            if data_header in fight_dict_keys:
+                merge_additional_data(data_header)
 
-            return fight_dict
+        return fight_dict
 
     def fight_dicts_to_df(self, fight_dict_list):
         with Pool(cpu_count()) as p:
@@ -348,7 +348,7 @@ class FightsCollector:
 
 # ## Fighters
 
-# In[7]:
+# In[6]:
 
 
 class FightersCollector:
@@ -458,7 +458,7 @@ class FightersCollector:
         self.save_fighters_df()
 
 
-# In[10]:
+# In[7]:
 
 
 def start_collectors():
@@ -479,14 +479,14 @@ def start_collectors():
     
     print("\nCompleted Fights Collector\n")
 
-    fighters_collector = FightersCollector()
+#     fighters_collector = FightersCollector()
 
-    fighters_collector.start()
+#     fighters_collector.start()
     
-    print("\nCompleted Fighters Collector\n")
+#     print("\nCompleted Fighters Collector\n")
 
 
-# In[11]:
+# In[8]:
 
 
 def main():
@@ -498,4 +498,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# In[ ]:
+
+
+
 
