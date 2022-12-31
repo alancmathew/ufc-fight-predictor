@@ -75,8 +75,7 @@ class EventsCollector:
                 assert eventlistpage_html != ""
                 soup = BeautifulSoup(eventlistpage_html, features="lxml")
                 row_elems = soup.find("tbody").find_all("tr", class_="b-statistics__table-row")
-                row_elems = lfilter(lambda r: \
-                                    len(r.find_all("a", 
+                row_elems = lfilter(lambda r:                                     len(r.find_all("a", 
                                                    class_="b-link b-link_style_black")) != 0, \
                                                 row_elems)
                 events_sublist = lmap(extract_event_data, row_elems)
@@ -94,12 +93,10 @@ class EventsCollector:
     
     
     def get_eventlist_dfs(self):
-        self.completed_events_df = \
-                self.get_eventlist_df(dir_dict["completed_eventlist_html"], 
+        self.completed_events_df =                 self.get_eventlist_df(dir_dict["completed_eventlist_html"], 
                                       "completed_events.csv")
         
-        self.upcoming_events_df = \
-                self.get_eventlist_df(dir_dict["upcoming_eventlist_html"], 
+        self.upcoming_events_df =                 self.get_eventlist_df(dir_dict["upcoming_eventlist_html"], 
                                       "upcoming_events.csv")
 
         
@@ -165,12 +162,10 @@ class FightsCollector:
         return df["Fight Url"].to_list()
     
     def get_fight_urls(self):
-        self.completed_fight_urls_list = \
-            self.save_fight_urls(dir_dict["completed_events_html"], 
+        self.completed_fight_urls_list =             self.save_fight_urls(dir_dict["completed_events_html"], 
                                  "completed_fight_urls_weightclasses.csv")
         
-        self.upcoming_fight_urls_list = \
-            self.save_fight_urls(dir_dict["upcoming_events_html"], 
+        self.upcoming_fight_urls_list =             self.save_fight_urls(dir_dict["upcoming_events_html"], 
                                  "upcoming_fight_urls_weightclasses.csv")
         
     def save_fight_pages(self):
@@ -233,8 +228,7 @@ class FightsCollector:
         def fight_tables_to_dicts(page_html: str):
 
             def extract_table(tables):
-                data_dict = {key:[] for key in map(lambda x: x.text.strip(), \
-                                                       tables[0].find("thead").find_all("th"))}
+                data_dict = {key:[] for key in map(lambda x: x.text.strip(),                                                        tables[0].find("thead").find_all("th"))}
                 data_dict["Round"] = []
 
                 for i, table in enumerate(tables[:2]):
@@ -267,8 +261,7 @@ class FightsCollector:
 
 
         try:
-            fight_dict["Totals"], fight_dict["Significant Strikes"] = \
-                                                    fight_tables_to_dicts(fight_html)
+            fight_dict["Totals"], fight_dict["Significant Strikes"] =                                                     fight_tables_to_dicts(fight_html)
         except IndexError:
             print("Table IndexError")
             pass 
@@ -292,8 +285,7 @@ class FightsCollector:
         return fights_dict_list
         
     def get_fight_dict(self): 
-        completed_fights_dict_list = \
-                        self.all_fight_data_extractor(dir_dict["completed_fights_html"])
+        completed_fights_dict_list =                         self.all_fight_data_extractor(dir_dict["completed_fights_html"])
         filepath = os.path.join(dir_dict["raw_json"], "completed_fights.json")
         with open(filepath, "w") as f:
             json.dump(completed_fights_dict_list, f, indent=4)
@@ -307,11 +299,9 @@ class FightsCollector:
             additional_dict = fight_dict.pop(data_header)
             fighter_names = additional_dict["Fighter"]
             round_order = lmap(lambda x: x.replace(" ", ""), additional_dict["Round"])
-            if (fighter_names[0] == fight_dict["Fighter1 Name"]) and \
-                                (fighter_names[1] == fight_dict["Fighter2 Name"]):
+            if (fighter_names[0] == fight_dict["Fighter1 Name"]) and                                 (fighter_names[1] == fight_dict["Fighter2 Name"]):
                 fighter_order = ["Fighter1", "Fighter2"]
-            elif (fighter_names[0] == fight_dict["Fighter2 Name"]) and \
-                                (fighter_names[1] == fight_dict["Fighter1 Name"]):
+            elif (fighter_names[0] == fight_dict["Fighter2 Name"]) and                                 (fighter_names[1] == fight_dict["Fighter1 Name"]):
                 fighter_order = ["Fighter1", "Fighter2"]
             else:
                 raise Exception(f"Fighter names not congurent in {data_header} table")
@@ -389,8 +379,7 @@ class FightersCollector:
                                                         "fighter_urls.txt")
         
     def save_fighter_pages(self):
-        alread_downloaded = lmap(lambda s: \
-                                     f"http://ufcstats.com/fighter-details/{s.replace('.html','')}", 
+        alread_downloaded = lmap(lambda s:                                      f"http://ufcstats.com/fighter-details/{s.replace('.html','')}", 
                                  os.listdir(dir_dict["fighters_html"]))
         
         self.fighters_url_list = set(self.fighters_url_list).difference(alread_downloaded)
@@ -444,7 +433,7 @@ class FightersCollector:
         fighter_filepaths = lmap(lambda s: os.path.join(fighters_html_dir, s), fighter_files)
 
         with Pool(cpu_count()) as p:
-            fighters_lod = p.map(self, extract_fighter_data, fighter_filepaths)
+            fighters_lod = p.map(self.extract_fighter_data, fighter_filepaths)
 
         return pd.DataFrame(fighters_lod)
     
