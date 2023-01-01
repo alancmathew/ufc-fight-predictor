@@ -3,7 +3,7 @@
 
 # ## Data Collection
 
-# In[1]:
+# In[40]:
 
 
 import re
@@ -15,6 +15,7 @@ import httpx
 import random
 import pandas as pd
 from tqdm import tqdm
+from functools import partial
 from bs4 import BeautifulSoup
 from multiprocessing import Pool, cpu_count
 
@@ -116,7 +117,7 @@ class EventsCollector:
 
 # ## Fights
 
-# In[5]:
+# In[66]:
 
 
 class FightsCollector:
@@ -150,7 +151,7 @@ class FightsCollector:
         event_files = lfilter(lambda x: x.endswith(".html"), os.listdir(events_html_dir))
 
         fight_urls_list = []
-        for filename in tqdm(event_files):
+        for filename in event_files:
             filepath = os.path.join(events_html_dir, filename)
             fight_urls_sublist = self.extract_fight_urls(filepath)
             fight_urls_list.extend(fight_urls_sublist)
@@ -173,19 +174,22 @@ class FightsCollector:
         save_pages(self.upcoming_fight_urls_list, dir_dict["upcoming_fights_html"])
         
     
-    def indiv_fight_data_extractor(self, fight_id_html):
+    def indiv_fight_data_extractor(self, fight_id_html, is_upcoming=False):
         fight_id, fight_html = fight_id_html 
         fight_dict = {}
-
+        
         soup = BeautifulSoup(fight_html, features="lxml")
-        title_a_elem = soup.find("h2", class_="b-content__title").find("a")
+        
+        title_elem = soup.find("h2", class_="b-content__title")
+        title_a_elem = title_elem.find("a")
         fight_dict["Event Name"] = title_a_elem.text.strip()
         fight_dict["Event Url"] = title_a_elem["href"]
         fight_dict["Fight ID"] = fight_id
         fighters = soup.find_all("div", class_="b-fight-details__person")
         for idx, fighter in enumerate(fighters, start=1):
-            fight_dict[f"Fighter{idx} Status"] = fighter.find("i", 
-                                    class_="b-fight-details__person-status").text.strip()
+            if not is_upcoming:
+                fight_dict[f"Fighter{idx} Status"] = fighter.find("i", 
+                                        class_="b-fight-details__person-status").text.strip()
 
             a_elem = fighter.find("a", class_="b-link b-fight-details__person-link")
             fight_dict[f"Fighter{idx} Name"] = a_elem.text.strip()
@@ -193,6 +197,9 @@ class FightsCollector:
 
         fight_dict["Bout"] = soup.find("i", class_="b-fight-details__fight-title").text.strip()
 
+        if is_upcoming:
+            return fight_dict
+        
         fight_details_div = soup.find("div", class_="b-fight-details__content")
 
         method_elem = fight_details_div.find("p").find("i", 
@@ -211,19 +218,13 @@ class FightsCollector:
         for label, text in detail_tups:
             fight_dict[label] = text
 
-        fight_dict
-
         details_text = fight_details_div.find_all("p")[1].text.replace("\n", "").strip()
 
         m = re.search(r"(.*):\s+(.*)", details_text)
         if m:
             fight_dict[m.group(1)] = m.group(2)
 
-        fight_dict
-
         tables = soup.find_all("table")
-
-        len(tables)
 
         def fight_tables_to_dicts(page_html: str):
 
@@ -263,16 +264,15 @@ class FightsCollector:
         try:
             fight_dict["Totals"], fight_dict["Significant Strikes"] =                                                     fight_tables_to_dicts(fight_html)
         except IndexError:
-            print("Table IndexError")
             pass 
 
         return fight_dict
     
-    def all_fight_data_extractor(self, fights_html_dir):
+    def all_fight_data_extractor(self, identifier, fights_html_dir):
         fights_html_dict = {}
 
         fight_files = lfilter(lambda x: x.endswith(".html"), os.listdir(fights_html_dir))
-        for filename in tqdm(fight_files):
+        for filename in fight_files:
             filepath = os.path.join(fights_html_dir, filename)
             with open(filepath, "r") as f:
                 html_str = f.read()
@@ -280,17 +280,20 @@ class FightsCollector:
                 fights_html_dict[fight_id] = html_str
 
         with Pool(cpu_count()) as p:
+            if identifier == "upcoming":
+                self.indiv_fight_data_extractor = partial(self.indiv_fight_data_extractor, 
+                                                          is_upcoming=True)
             fights_dict_list = p.map(self.indiv_fight_data_extractor, fights_html_dict.items())
 
         return fights_dict_list
         
-    def get_fight_dict(self): 
-        completed_fights_dict_list =                         self.all_fight_data_extractor(dir_dict["completed_fights_html"])
-        filepath = os.path.join(dir_dict["raw_json"], "completed_fights.json")
+    def get_fight_dict(self, identifier, fights_html_dir): 
+        fights_dict_list =                         self.all_fight_data_extractor(identifier, fights_html_dir)
+        filepath = os.path.join(dir_dict["raw_json"], f"{identifier}_fights.json")
         with open(filepath, "w") as f:
-            json.dump(completed_fights_dict_list, f, indent=4)
+            json.dump(fights_dict_list, f, indent=4)
             
-        return completed_fights_dict_list
+        return fights_dict_list
     
     
     def process_fight_dict(self, fight_dict):
@@ -326,28 +329,39 @@ class FightsCollector:
         return pd.DataFrame(res_fight_dict_list)
 
     
-    def save_fight_df(self):
-        completed_fights_lod = self.get_fight_dict()
-        fights_df = self.fight_dicts_to_df(completed_fights_lod)
-        filepath = os.path.join(dir_dict["raw_csv"], "completed_fights.csv")
+    def save_fight_df(self, identifier):
+        if identifier == "completed":
+            folderpath = dir_dict["completed_fights_html"]
+        elif identifier == "upcoming":
+            folderpath = dir_dict["upcoming_fights_html"]
+        else:
+            raise("Unknown file name in save_fight_df")
+            
+        fights_lod = self.get_fight_dict(identifier, folderpath)
+        fights_df = self.fight_dicts_to_df(fights_lod)
+        filepath = os.path.join(dir_dict["raw_csv"], f"{identifier}_fights.csv")
         fights_df.to_csv(filepath, index=False)
+        
+    def save_fight_dfs(self):
+        self.save_fight_df("completed")
+        self.save_fight_df("upcoming")
     
     def start(self):
         self.get_fight_urls()
         self.save_fight_pages()
-        self.save_fight_df()
+        self.save_fight_dfs()
 
 
 # ## Fighters
 
-# In[6]:
+# In[67]:
 
 
 class FightersCollector:
         
     def save_fighterlist_pages(self):
-        for i in tqdm(range(97,123)):
-            fighterlist_page_first_url = f"http://ufcstats.com/statistics/fighters?char={chr(i)}"
+        for i in range(97,123):
+            fighterlist_page_first_url = f"http://ufcstats.com/statistics/fighters?char={chr(i)}&page=1"
             download_sequential_pages(fighterlist_page_first_url, dir_dict["fighterlist_html"])
         
     def extract_fighter_urls(self, fighterlist_html_filepath: str) -> list[str]:
@@ -439,7 +453,7 @@ class FightersCollector:
     
     def save_fighters_df(self):
         fighters_df = self.create_fighters_df(dir_dict["fighters_html"])
-        filepath = os.path.join(dir_dict["raw_csv"], "fighters_data.csv")
+        filepath = os.path.join(dir_dict["raw_csv"], "fighters.csv")
         fighters_df.to_csv(filepath, index=False)
         
     def start(self):
@@ -449,7 +463,7 @@ class FightersCollector:
         self.save_fighters_df()
 
 
-# In[7]:
+# In[68]:
 
 
 def start_collectors():
@@ -477,14 +491,14 @@ def start_collectors():
     print("\nCompleted Fighters Collector\n")
 
 
-# In[8]:
+# In[69]:
 
 
 def main():
     start_collectors()
 
 
-# In[9]:
+# In[70]:
 
 
 if __name__ == "__main__":

@@ -14,9 +14,10 @@ lfilter = lambda funcion, iterable: list(filter(funcion, iterable))
 dir_dict = dict()
 
 dir_dict["data"] = "../data/"
-dir_dict["raw"] = os.path.join(dir_dict["data"], "raw")
-dir_dict["clean"] = os.path.join(dir_dict["data"], "clean")
-dir_dict["preprocessed"] = os.path.join(dir_dict["data"], "preprocessed")
+dir_dict["raw"] = os.path.join(dir_dict["data"], "01_raw")
+dir_dict["clean"] = os.path.join(dir_dict["data"], "02_cleaned")
+dir_dict["feature_engineered"] = os.path.join(dir_dict["data"], "03_feature_engineered")
+dir_dict["preprocessed"] = os.path.join(dir_dict["data"], "04_preprocessed")
 dir_dict["raw_csv"] = os.path.join(dir_dict["raw"], "csv")
 dir_dict["raw_json"] = os.path.join(dir_dict["raw"], "json")
 dir_dict["html"] = os.path.join(dir_dict["raw"], "html")
@@ -155,7 +156,7 @@ def download_sequential_pages(first_url: str, folderpath: str = dir_dict["html"]
     if num_pages != 1:
         urls, filenames = [], []
         inter = "&" if "?" in first_url else "?"
-        for page_num in tqdm(range(2, num_pages+1)):
+        for page_num in range(2, num_pages+1):
             if "page=1" in first_url:
                 url = first_url.replace("page=1", f"page={page_num}")
             else:
