@@ -38,15 +38,14 @@ from utilities import *
 
 
 class EventsCollector:
-    
-    def __init__(self, conf):
-        self.conf = conf
-        
         
     def save_eventlist_pages(self):
-        download_sequential_pages(self.conf["completed_first_url"], 
+        completed_first_url = "http://ufcstats.com/statistics/events/completed?page=1"
+        upcoming_first_url = "http://ufcstats.com/statistics/events/upcoming?page=1"
+        
+        download_sequential_pages(completed_first_url, 
                                   dir_dict["completed_eventlist_html"])
-        download_sequential_pages(self.conf["upcoming_first_url"], 
+        download_sequential_pages(upcoming_first_url, 
                                   dir_dict["upcoming_eventlist_html"])
          
     def get_events_list(self, eventlist_html_dir: str) -> list[str]:
@@ -466,13 +465,9 @@ class FightersCollector:
 # In[68]:
 
 
-def start_collectors():
-    events_conf = {
-        "completed_first_url": "http://ufcstats.com/statistics/events/completed?page=1",
-        "upcoming_first_url": "http://ufcstats.com/statistics/events/upcoming?page=1"
-    }
+def collect():
 
-    events_collector = EventsCollector(events_conf)
+    events_collector = EventsCollector()
 
     events_collector.start()
 
@@ -495,7 +490,7 @@ def start_collectors():
 
 
 def main():
-    start_collectors()
+    collect()
 
 
 # In[70]:
@@ -503,10 +498,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# In[ ]:
-
-
-
 

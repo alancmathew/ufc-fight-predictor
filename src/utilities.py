@@ -1,5 +1,6 @@
 import os
 import time
+import json
 import httpx
 import random
 import pandas as pd
@@ -10,28 +11,7 @@ from urllib.parse import urlparse
 lmap = lambda funcion, iterable: list(map(funcion, iterable))
 lfilter = lambda funcion, iterable: list(filter(funcion, iterable))
 
-
 dir_dict = dict()
-
-dir_dict["data"] = "../data/"
-dir_dict["raw"] = os.path.join(dir_dict["data"], "01_raw")
-dir_dict["clean"] = os.path.join(dir_dict["data"], "02_cleaned")
-dir_dict["feature_engineered"] = os.path.join(dir_dict["data"], "03_feature_engineered")
-dir_dict["preprocessed"] = os.path.join(dir_dict["data"], "04_preprocessed")
-dir_dict["raw_csv"] = os.path.join(dir_dict["raw"], "csv")
-dir_dict["raw_json"] = os.path.join(dir_dict["raw"], "json")
-dir_dict["html"] = os.path.join(dir_dict["raw"], "html")
-dir_dict["completed_html"] = os.path.join(dir_dict["html"], "completed")
-dir_dict["upcoming_html"] = os.path.join(dir_dict["html"], "upcoming")
-dir_dict["fighterlist_html"] = os.path.join(dir_dict["html"], "fighterlist")
-dir_dict["fighters_html"] = os.path.join(dir_dict["html"], "fighters")
-dir_dict["completed_eventlist_html"] = os.path.join(dir_dict["completed_html"], "eventlist")
-dir_dict["completed_events_html"] = os.path.join(dir_dict["completed_html"], "events")
-dir_dict["completed_fights_html"] = os.path.join(dir_dict["completed_html"], "fights")
-dir_dict["upcoming_eventlist_html"] = os.path.join(dir_dict["upcoming_html"], "eventlist")
-dir_dict["upcoming_events_html"] = os.path.join(dir_dict["upcoming_html"], "events")
-dir_dict["upcoming_fights_html"] = os.path.join(dir_dict["upcoming_html"], "fights")
-
 
 def write_list_to_file(thelist: list[str], filepath: str) -> None:
     with open(filepath, "w") as f:
@@ -43,14 +23,14 @@ def read_list_from_file(filepath: str) -> list[str]:
         return f.read().splitlines()
 
     
-def save_html(html_str: str, filename: str, folderpath: str = dir_dict["html"]) -> None:
+def save_html(html_str: str, filename: str, folderpath: str) -> None:
     os.makedirs(folderpath, exist_ok=True)
     
     filepath = os.path.join(folderpath, filename)
     with open(filepath, "w") as f:
         f.write(html_str)
         
-def download_get_html(url: str, filename: str, folderpath: str = dir_dict["html"], session=None) -> str:
+def download_get_html(url: str, filename: str, folderpath: str, session=None) -> str:
     if session:
         r = session.get(url)
     else:
@@ -126,7 +106,7 @@ def save_pages(urls: list[str], folderpath: str, filenames: list[str] = None) ->
             reached_not_downloaded = False
             
             
-def download_sequential_pages(first_url: str, folderpath: str = dir_dict["html"]) -> None:
+def download_sequential_pages(first_url: str, folderpath: str) -> None:
     
     filename = sequential_filename_from_url(first_url)
 
@@ -229,8 +209,13 @@ class ColumnTracker:
         
 
 def main():
+    
+    global dir_dict
+    with open("../config.json", "r") as fh:
+        dir_dict = json.load(fh)["dirs"]
+    
     for folderpath in dir_dict.values():
         os.makedirs(folderpath, exist_ok=True)
-    
 
+        
 main()

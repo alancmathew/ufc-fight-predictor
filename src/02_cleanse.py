@@ -268,7 +268,7 @@ def clean_dataset(filename, cleaner_func):
 # In[20]:
 
 
-def clean_all_data():
+def cleanse():
     filename_cleaner_map = {
         "completed_events": clean_events, 
         "upcoming_events": clean_events, 
@@ -286,7 +286,7 @@ def clean_all_data():
 
 
 def main():
-    clean_all_data()
+    cleanse()
 
 
 # In[22]:

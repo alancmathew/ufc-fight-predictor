@@ -54,6 +54,10 @@ def merge_datasets(identifier):
 
     df = df.loc[df["fighter_id_A"] != df["fighter_id_B"]].reset_index(drop=True)
 
+    if identifier == "completed":
+        df["winner"] = df["fight_fighter_won_B"]
+        df = df.drop(["fight_fighter_won_A", "fight_fighter_won_B"], axis=1)
+
     filepath = os.path.join(dir_dict["clean"], f"{identifier}_merged.parquet")
     df.to_parquet(filepath)
     
@@ -63,19 +67,21 @@ def merge_datasets(identifier):
 # In[7]:
 
 
-def merge_completed_upcoming():
+def merge():
     completed = merge_datasets("completed")
     upcoming = merge_datasets("upcoming")
-    
-    return completed, upcoming
 
 
-# In[8]:
+# In[ ]:
 
-def main():
-    merge_completed_upcoming()
-    
-    
+
+def main():        
+    merge()
+
+
+# In[ ]:
+
 
 if __name__ == "__main__":
     main()
+
