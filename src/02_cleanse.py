@@ -78,6 +78,9 @@ def clean_fights(df, identifier):
     
     df = join_weight_class(df, identifier) 
         
+    # Drop fights that ended in draw
+    if identifier == "completed":
+        df = df.loc[(df["Fighter1 Status"] == "W") | (df["Fighter2 Status"] == "W")].reset_index(drop=True)
     
     to_drop = [col for col in df.columns if "Details:" in col] + ["Event Name"]
     df = df.drop(to_drop, axis=1)
@@ -118,12 +121,15 @@ def clean_fights(df, identifier):
     cat_cols = ["bout", "method", "time_format", "weight_class"]
     for col in cat_cols:
         if col in df.columns:
+            if col in ["method", "bout", "weight_class"]:
+                method_formatter = lambda s: s.lower()                                                .replace(" - ","_")                                                .replace("/", "_")                                                .replace(" ", "_")                                                .replace("'","")
+                df[col] = df[col].map(method_formatter)
             df[col] = df[col].astype("category")
     
     if identifier == "upcoming":
         return df.reset_index(drop=True)
 
-    df["fighter_won"] = (df["fighter_status"] == "W").astype("uint8")
+    df["fighter_win"] = (df["fighter_status"] == "W")
     df = df.drop("fighter_status", axis=1)
     
     
@@ -211,8 +217,8 @@ def clean_fighters(df):
     df[str_cols] = df[str_cols].astype("string")
     
     # Category columns
-    cat_cols = ["stance"]
-    df[cat_cols] = df[cat_cols].astype("category")
+    df["stance"] = df["stance"].str.lower().str.replace(" ","_")
+    df["stance"] = df["stance"].astype("category")
     
     # ID columns
     df["fighter_id"] = df["fighter_id"].map(lambda s: int(str(s), 16))

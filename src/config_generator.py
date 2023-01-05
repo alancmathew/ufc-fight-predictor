@@ -1,13 +1,19 @@
 import os
+import sys
 import json
 
 def config_generator(filepath: str = "../config.json"):
     config = {
-        "steps": ["01_collect", "02_cleanse", "03_merge"]
+        "steps": [
+            # "01_collect", 
+            "02_cleanse", 
+            "03_merge"
+        ]
     }
     
     config["dirs"] = dict()
     config["dirs"]["data"] = "../data/"
+    config["dirs"]["checkpoints"] = os.path.join(config["dirs"]["data"], "00_checkpoints")
     config["dirs"]["raw"] = os.path.join(config["dirs"]["data"], "01_raw")
     config["dirs"]["clean"] = os.path.join(config["dirs"]["data"], "02_cleaned")
     config["dirs"]["feature_engineered"] = os.path.join(config["dirs"]["data"], "03_feature_engineered")
@@ -32,7 +38,12 @@ def config_generator(filepath: str = "../config.json"):
     
     
 def main():
-    config_generator()
+    args = sys.argv 
+    if len(args) > 2:
+        raise Exception("config_generator.py expects 0 or 1 arguments")
+        
+    filepath = args[1] if len(args) == 2 else "../config.json" 
+    config_generator(filepath)
     
 if __name__ == "__main__":
     main()

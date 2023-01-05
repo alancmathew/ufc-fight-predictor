@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import importlib
 import subprocess
@@ -19,7 +20,11 @@ def run_pipeline(steps):
     
 
 def main():
-    with open("../config.json", "r") as fh:
+    args = sys.argv
+    if len(args) != 2:
+        raise("runner.py requires filepath of config.json as argument")
+        
+    with open(args[1], "r") as fh:
         config = json.load(fh)
         
     steps = config["steps"]

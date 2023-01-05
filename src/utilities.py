@@ -207,6 +207,14 @@ class ColumnTracker:
     def print_num_left(self):
         print(f"Remaining columns: {len(self.main_list)}")
         
+def save_checkpoint(df: pd.DataFrame, filename: str = "data_checkpoint", slot: int = 0):
+    filepath = os.path.join(dir_dict["checkpoints"], f"{filename}-{slot:03}.parquet")
+    df.to_parquet(filepath)
+    
+def load_checkpoint(filename: str = "data_checkpoint", slot: int = 0):
+    filepath = os.path.join(dir_dict["checkpoints"], f"{filename}-{slot:03}.parquet")
+    return pd.read_parquet(filepath)
+        
 
 def main():
     
