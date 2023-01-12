@@ -4,4 +4,5 @@ data/
 __pycache__/
 credentials.json
 misc/
+assets/model_training/
 src/utilities.py
