@@ -6,7 +6,7 @@ def config_generator(filepath: str = "../config.json"):
     config = {
         "steps": [
             # "01_collect", 
-            "02_cleanse", 
+            # "02_cleanse", 
             "03_merge"
         ]
     }
@@ -18,6 +18,7 @@ def config_generator(filepath: str = "../config.json"):
     config["dirs"]["clean"] = os.path.join(config["dirs"]["data"], "02_cleaned")
     config["dirs"]["feature_engineered"] = os.path.join(config["dirs"]["data"], "03_feature_engineered")
     config["dirs"]["preprocessed"] = os.path.join(config["dirs"]["data"], "04_preprocessed")
+    config["dirs"]["train_test"] = os.path.join(config["dirs"]["data"], "05_train_test")
     config["dirs"]["raw_csv"] = os.path.join(config["dirs"]["raw"], "csv")
     config["dirs"]["raw_json"] = os.path.join(config["dirs"]["raw"], "json")
     config["dirs"]["html"] = os.path.join(config["dirs"]["raw"], "html")
