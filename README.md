@@ -14,4 +14,4 @@ The data for this project was scraped from [UFCStats](http://ufcstats.com), an u
 
 Once scraped, the data was normalized into three tables: **events**, **fights**, and **fighters**; which were then cleansed individually.
 
-![]()
+![](assets/imgs/schema_diagram.png)
