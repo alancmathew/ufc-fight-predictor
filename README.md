@@ -40,7 +40,7 @@ The scrape consisted of over 11,000 pages on the website.
 
 Once scraped, the data was normalized into three tables: **events**, **fights**, and **fighters**; which were then cleansed individually.
 
-![](assets/imgs/schema_diagram.png)
+![Author: Alan Mathew](assets/imgs/schema_diagram.png "ER Diagram")
 
 Once clean, the tables where joined together to form a large table of fight details.
 
@@ -69,6 +69,62 @@ Another measure of recent performance that was added is a fighter's winning or l
 ### v. Cumulative means of fight stats
 
 A number of per fight stats including number of knockdowns and significant strikes were also available. Using that, cumulative means of these fight stats were created to reflect each fighter's average performance up till the date of each fight.
+
+## 3. Model Training & Evaluation <a name="3-model" href="#toc">^</a>
+
+### i. Train/Test Split
+
+Before model training, the data was split into train (*n=6860, p=0.75*) and test (*n=2286, 0.25*) sets. The train set will be used to train and optimize the model and the test set will be used to evaluate only the best model.
+
+### ii. Model Selection (Feature Selection & Hyperparameter Tuning)
+
+To find the optimal model, a number of difference machine learning algorithmns were tested. For each model, a pipeline was created to scale the data, select the k best features (where k is a hyperparameter to be optimized), and perform hyperparamater tuning. To perform hyperparameter tuning, the pipeline was subject to 3-fold cross validation, attempting to find the paramaters that maximized accuracy.
+
+The best model was a **Logistic Regression** model with **360** **features**, which had a 5-fold cross validated accuracy of: **0.6089** (60.89%).
+
+### iii. Evaluation
+
+After having selected the best model, it was then evaluated using the train and test sets, which yielded the following confusion matrices:  
+
+![Author: Alan Mathew](assets/imgs/train_confusion_matrix.png "Train Confusion Matrix")
+
+![Author: Alan Mathew](assets/imgs/test_confusion_matrix.png "Test Confusion Matrix")
+
+And produced the following table of metrics:
+
+<table class="dataframe" border="1">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>accuracy</th>
+      <th>f1_score</th>
+      <th>precision</th>
+      <th>recall</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>train</th>
+      <td>0.6531</td>
+      <td>0.6531</td>
+      <td>0.6529</td>
+      <td>0.6533</td>
+    </tr>
+    <tr>
+      <th>test</th>
+      <td>0.6234</td>
+      <td>0.6144</td>
+      <td>0.6299</td>
+      <td>0.5997</td>
+    </tr>
+  </tbody>
+</table>
+
+Thus, based on unseen data, the model seems to have an accuracy of **0.6234** (62.34%).
+
+### iv. Re-train
+
+After evaluating the model with the test set, the model was re-trained using all the available data (train + test sets).
 
 ## Sources <a name="sources" href="#toc">^</a>
 
