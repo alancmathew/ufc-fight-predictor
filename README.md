@@ -38,10 +38,6 @@ Once scraped, the data was normalized into three tables: **events**, **fights**,
 
 Once clean, the tables where joined together to form a large table of fight details.
 
-
-
 ### Sources
 
-
-
-#### Image Sources
+- https://c4.wallpaperflare.com/wallpaper/556/917/227/arts-b-w-battle-battles-wallpaper-preview.jpg
