@@ -45,7 +45,7 @@ def clean_events(df):
     
     df["name"] = df["name"].astype("string")
     df["date"] = pd.to_datetime(df["date"], format="%B %d, %Y", errors="coerce")                .fillna(pd.to_datetime(df["date"], format="%b %d, %Y", errors="coerce"))
-    df["id"] = df["url"].map(lambda s: os.path.split(s)[1])                        .map(lambda s: int(str(s), 16))                        .astype("uint")
+    df["id"] = df["url"].map(lambda s: os.path.split(s)[1])                        .map(lambda s: int(str(s), 16))                        .astype("float")
     df["city"] = df["city"].astype("category")
     df["state"] = df["state"].astype("category")
     df["country"] = df["country"].astype("category")
@@ -53,6 +53,8 @@ def clean_events(df):
     df = df.drop(["location", "url"], axis=1)
     
     df = df.rename({col:f"event_{col}" for col in df.columns}, axis=1)
+    
+    df = df.drop_duplicates(ignore_index=True)
     
     return df.reset_index(drop=True)
 
@@ -71,7 +73,7 @@ def join_weight_class(df, identifier):
     return df
 
 
-# In[16]:
+# In[7]:
 
 
 def clean_fights(df, identifier):
@@ -112,7 +114,7 @@ def clean_fights(df, identifier):
     df[new_id_cols] = df[url_cols].applymap(lambda s: os.path.split(s)[1])
     
     id_cols = [col for col in df.columns if "id" in col]
-    df.loc[:, id_cols] = df.loc[:,id_cols].applymap(lambda s: int(str(s), 16)).astype("uint")
+    df.loc[:, id_cols] = df.loc[:,id_cols].applymap(lambda s: int(str(s), 16)).astype("float")
     
     df = df.drop(url_cols, axis=1)
     
@@ -193,7 +195,7 @@ def clean_fights(df, identifier):
     return df.reset_index(drop=True)
 
 
-# In[17]:
+# In[8]:
 
 
 def clean_completed_fights(df):
@@ -206,7 +208,7 @@ def clean_upcoming_fights(df):
 
 # ### Fighters
 
-# In[18]:
+# In[9]:
 
 
 def clean_fighters(df):
@@ -221,7 +223,7 @@ def clean_fighters(df):
     df["stance"] = df["stance"].astype("category")
     
     # ID columns
-    df["fighter_id"] = df["fighter_id"].map(lambda s: int(str(s), 16))
+    df["fighter_id"] = df["fighter_id"].map(lambda s: int(str(s), 16)).astype("float")
     
     wlt = df["record"].str.extract(r"(?P<wins>\d+)-(?P<losses>\d+)-(?P<ties>\d+)").astype("uint8")
     df = pd.concat([df, wlt], axis=1)
@@ -254,7 +256,7 @@ def clean_fighters(df):
     return df.reset_index(drop=True)
 
 
-# In[19]:
+# In[10]:
 
 
 def clean_dataset(filename, cleaner_func):
@@ -271,7 +273,7 @@ def clean_dataset(filename, cleaner_func):
     df.to_parquet(filepath)
 
 
-# In[20]:
+# In[11]:
 
 
 def cleanse():
@@ -288,16 +290,22 @@ def cleanse():
         print(f"Cleaned {filename}")
 
 
-# In[21]:
+# In[12]:
 
 
 def main():
     cleanse()
 
 
-# In[22]:
+# In[13]:
 
 
 if __name__ == "__main__":
     main()
+
+
+# In[ ]:
+
+
+
 

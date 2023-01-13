@@ -6,8 +6,11 @@ def config_generator(filepath: str = "../config.json"):
     config = {
         "steps": [
             # "01_collect", 
-            # "02_cleanse", 
-            "03_merge"
+            "02_cleanse", 
+            "03_merge",
+            "04_feature-eng",
+            "05_agg-processor",
+            "06_preprocessor"
         ]
     }
     

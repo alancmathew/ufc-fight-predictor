@@ -40,6 +40,20 @@ def read_parquet(identifier):
 # In[6]:
 
 
+identifier = "upcoming"
+events = read_parquet(f"{identifier}_events")
+fights = read_parquet(f"{identifier}_fights")
+fighters = read_parquet("fighters")
+
+fighters = fighters.drop(fighters.iloc[0,5:16].index, axis=1)
+fighters = fighters.drop("fighter_weight_lbs", axis=1)
+
+# df = events.merge(fights, on="event_id", how="right").merge(fighters, on="fighter_id", how="left")
+
+
+# In[7]:
+
+
 def merge_datasets(identifier):
     events = read_parquet(f"{identifier}_events")
     fights = read_parquet(f"{identifier}_fights")
@@ -50,7 +64,8 @@ def merge_datasets(identifier):
     
     df = events.merge(fights, on="event_id", how="right").merge(fighters, on="fighter_id", how="left")
     df = df.drop(["event_id"], axis=1)
-
+    
+    
     general_cols = [col for col in df.columns                     if not (col.startswith("fight_fighter_") or col.startswith("fighter_") or col == "fight_id")]
 
     opponent_rename_dict = {col:col.replace("fighter", "opponent") for col in df.columns}
@@ -70,7 +85,7 @@ def merge_datasets(identifier):
     return df
 
 
-# In[7]:
+# In[8]:
 
 
 def merge():
@@ -78,16 +93,22 @@ def merge():
     upcoming = merge_datasets("upcoming")
 
 
-# In[ ]:
+# In[9]:
 
 
 def main():        
     merge()
 
 
-# In[ ]:
+# In[10]:
 
 
 if __name__ == "__main__":
     main()
+
+
+# In[ ]:
+
+
+
 

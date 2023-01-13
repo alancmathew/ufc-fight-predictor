@@ -8,6 +8,7 @@ import os
 import sys
 import json
 import time
+import joblib
 import warnings
 import numpy as np
 import pandas as pd
@@ -61,8 +62,8 @@ X, y = df.drop(target, axis=1), df[target]
 # In[8]:
 
 
-def cross_validate(estimator, X=X, y=y):
-    return np.mean(cross_val_score(estimator, X, y, cv=5, n_jobs=5))
+def cross_validate(estimator, X=X, y=y, cv=5, **kwargs):
+    return np.mean(cross_val_score(estimator, X, y, cv=cv, **kwargs))
 
 
 # ### Initial Model
@@ -104,7 +105,7 @@ pipe = Pipeline([
 cross_validate(pipe)
 
 
-# ### Model Selection (Hyperparameter Tuning), Feature Selection
+# ## Model Selection (Hyperparameter Tuning & Feature Selection)
 
 # In[14]:
 
@@ -115,54 +116,99 @@ from sklearn.feature_selection import SelectKBest, f_regression
 # In[15]:
 
 
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
 
 
 # In[16]:
 
 
-sys.path.append("../misc/")
+sys.path.append("../assets/model_training")
 
 
 # In[17]:
 
 
-from clf_param_grid_list_generator import clfs
+from clf_param_grid_list import clfs
 
 
 # In[ ]:
 
 
-search_results = dict()
-for name, est_dict in tqdm(clfs.items()):
-    pipe = Pipeline([
-        ("scaler", MinMaxScaler()),
-        ("selector", SelectKBest(f_regression)),
-        ("model", est_dict["model"])
-    ])
+# search_results = dict()
+# for name, est_dict in tqdm(clfs.items()):
+#     pipe = Pipeline([
+#         ("scaler", MinMaxScaler()),
+#         ("selector", SelectKBest(f_regression)),
+#         ("model", est_dict["model"])
+#     ])
     
-    param_grid = {f"model__{k}":v for k, v in est_dict["param_grid"].items()}
-    param_grid["selector__k"] = [i*10 for i in range(20,57)]
+#     param_grid = {f"model__{k}":v for k, v in est_dict["param_grid"].items()}
+#     param_grid["selector__k"] = [i*10 for i in range(20,57)]
     
-    search = RandomizedSearchCV(estimator=pipe, param_distributions=param_grid, n_iter=500, 
-                                cv=3, n_jobs=int(cpu_count() / 2), scoring ="accuracy", verbose=5)
+#     search = RandomizedSearchCV(estimator=pipe, param_distributions=param_grid, n_iter=500, 
+#                                 cv=3, n_jobs=int(cpu_count() / 2), scoring ="accuracy", verbose=5)
     
-    search.fit(X, y)
-    search_results[name] = {
-        "best_params": search.best_params_,
-        "best_score": search.best_score_
-    }
+#     search.fit(X, y)
+#     search_results[name] = {
+#         "best_params": search.best_params_,
+#         "best_score": search.best_score_
+#     }
     
-    with open("../assets/search_results.json", "w") as fh:
-        json.dump(search_results, fh)
+#     with open("../assets/model_training/search_results.json", "w") as fh:
+#         json.dump(search_results, fh)
         
-    time.sleep(120)
+#     time.sleep(120)
+
+
+# ## Saving Models
+
+# In[46]:
+
+
+with open("../assets/model_training/search_results.json", "r") as fh:
+    search_results = json.load(fh)
+
+
+# In[47]:
+
+
+best_model_name, best_result = max(search_results.items(), key=lambda x: x[1]["best_score"])
+best_model = clfs[best_model_name]["model"]
+best_params = best_result["best_params"]
+# best_params["model__C"] = 100 
+
+pipe = Pipeline([
+    ("scaler", MinMaxScaler()),
+    ("selector", SelectKBest(f_regression)),
+    ("model", best_model)
+])
+pipe.set_params(**best_params)
+print("accuracy:", cross_validate(pipe, cv=5, n_jobs=cpu_count()))
 
 
 # In[ ]:
 
 
-search_results
+for name, est_dict in clfs.items():
+    if name == best_model_name:
+        param_grid = dict()
+        param_grid["model__C"] = est_dict["param_grid"]["C"]
+
+        search = RandomizedSearchCV(estimator=pipe, param_distributions=param_grid, n_iter=100, 
+                                    cv=5, n_jobs=cpu_count(), scoring ="accuracy", verbose=5)
+
+        search.fit(X, y)
+        
+        break
+        
+pipe.set_params(**search.best_params_)
+
+
+# In[ ]:
+
+
+pipe.fit(X, y)
+joblib.dump(pipe, "../assets/model_training/trained_pipeline.joblib")
 
 
 # In[ ]:

@@ -1,10 +1,12 @@
 # UFC Fight Predictor
 
-Using machine learning to predict UFC fight results
-
 ## Goal
 
-Correctly predict the outcome of UFC fights to make bets
+Create a machine learning model that can predict fight results with a higher degree of accuracy than the baseline (50%)
+
+## Metric
+
+The mertric of interest to be optimized is **accuracy**, since classes are balanced and incorrectly predicting either binary outcome would be equally undesirable.
 
 ## Data
 
