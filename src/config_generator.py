@@ -10,7 +10,11 @@ def config_generator(filepath: str = "../config.json"):
             "03_merge",
             "04_feature-eng",
             "05_agg-processor",
-            "06_preprocessor"
+            "06_preprocessor",
+            "07_model-selection",
+            "08_model-evaluation",
+            "09_feature-importances",
+            "10_inference"
         ]
     }
     

@@ -53,8 +53,6 @@ def join_agg_data(df, agg):
     df = df.merge(agg.drop(["opponent_id", "fight_fighter_win"], axis=1), how="left", on="fighter_id")
     
     df = df.loc[df["event_date_x"] > df["event_date_y"]].reset_index(drop=True)
-
-    print(df.shape)
     
     def get_latest_data(df):
         return df.loc[df["event_date_y"] == df["event_date_y"].max()]
@@ -137,7 +135,7 @@ cols = ["event_date", "fight_id", "fighter_id", "opponent_id"]
 upcoming_fights = pd.read_parquet(filepath, columns=cols)
 
 
-# In[22]:
+# In[ ]:
 
 
 upcoming_fights

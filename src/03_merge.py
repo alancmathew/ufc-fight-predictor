@@ -37,21 +37,7 @@ def read_parquet(identifier):
     return pd.read_parquet(filepath)
 
 
-# In[6]:
-
-
-identifier = "upcoming"
-events = read_parquet(f"{identifier}_events")
-fights = read_parquet(f"{identifier}_fights")
-fighters = read_parquet("fighters")
-
-fighters = fighters.drop(fighters.iloc[0,5:16].index, axis=1)
-fighters = fighters.drop("fighter_weight_lbs", axis=1)
-
-# df = events.merge(fights, on="event_id", how="right").merge(fighters, on="fighter_id", how="left")
-
-
-# In[7]:
+# In[ ]:
 
 
 def merge_datasets(identifier):
@@ -85,7 +71,7 @@ def merge_datasets(identifier):
     return df
 
 
-# In[8]:
+# In[ ]:
 
 
 def merge():
@@ -93,14 +79,14 @@ def merge():
     upcoming = merge_datasets("upcoming")
 
 
-# In[9]:
+# In[ ]:
 
 
 def main():        
     merge()
 
 
-# In[10]:
+# In[ ]:
 
 
 if __name__ == "__main__":

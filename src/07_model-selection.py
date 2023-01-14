@@ -131,51 +131,50 @@ sys.path.append("../assets/model_training")
 from clf_param_grid_list import clfs
 
 
-# In[ ]:
+# In[18]:
 
 
-# search_results = dict()
-# for name, est_dict in tqdm(clfs.items()):
-#     pipe = Pipeline([
-#         ("scaler", MinMaxScaler()),
-#         ("selector", SelectKBest(f_regression)),
-#         ("model", est_dict["model"])
-#     ])
+search_results = dict()
+for name, est_dict in tqdm(clfs.items()):
+    pipe = Pipeline([
+        ("scaler", MinMaxScaler()),
+        ("selector", SelectKBest(f_regression)),
+        ("model", est_dict["model"])
+    ])
     
-#     param_grid = {f"model__{k}":v for k, v in est_dict["param_grid"].items()}
-#     param_grid["selector__k"] = [i*10 for i in range(20,57)]
+    param_grid = {f"model__{k}":v for k, v in est_dict["param_grid"].items()}
+    param_grid["selector__k"] = [i*10 for i in range(20,57)]
     
-#     search = RandomizedSearchCV(estimator=pipe, param_distributions=param_grid, n_iter=500, 
-#                                 cv=3, n_jobs=int(cpu_count() / 2), scoring ="accuracy", verbose=5)
+    search = RandomizedSearchCV(estimator=pipe, param_distributions=param_grid, n_iter=500, 
+                                cv=3, n_jobs=int(cpu_count() / 2), scoring ="accuracy", verbose=5)
     
-#     search.fit(X, y)
-#     search_results[name] = {
-#         "best_params": search.best_params_,
-#         "best_score": search.best_score_
-#     }
+    search.fit(X, y)
+    search_results[name] = {
+        "best_params": search.best_params_,
+        "best_score": search.best_score_
+    }
     
-#     with open("../assets/model_training/search_results.json", "w") as fh:
-#         json.dump(search_results, fh)
+    with open("../assets/model_training/search_results.json", "w") as fh:
+        json.dump(search_results, fh)
         
-#     time.sleep(120)
+    time.sleep(120)
 
 
 # ## Saving Models
 
-# In[46]:
+# In[22]:
 
 
 with open("../assets/model_training/search_results.json", "r") as fh:
     search_results = json.load(fh)
 
 
-# In[47]:
+# In[23]:
 
 
 best_model_name, best_result = max(search_results.items(), key=lambda x: x[1]["best_score"])
 best_model = clfs[best_model_name]["model"]
 best_params = best_result["best_params"]
-# best_params["model__C"] = 100 
 
 pipe = Pipeline([
     ("scaler", MinMaxScaler()),
@@ -186,25 +185,7 @@ pipe.set_params(**best_params)
 print("accuracy:", cross_validate(pipe, cv=5, n_jobs=cpu_count()))
 
 
-# In[ ]:
-
-
-for name, est_dict in clfs.items():
-    if name == best_model_name:
-        param_grid = dict()
-        param_grid["model__C"] = est_dict["param_grid"]["C"]
-
-        search = RandomizedSearchCV(estimator=pipe, param_distributions=param_grid, n_iter=100, 
-                                    cv=5, n_jobs=cpu_count(), scoring ="accuracy", verbose=5)
-
-        search.fit(X, y)
-        
-        break
-        
-pipe.set_params(**search.best_params_)
-
-
-# In[ ]:
+# In[21]:
 
 
 pipe.fit(X, y)
