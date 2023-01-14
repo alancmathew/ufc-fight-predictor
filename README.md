@@ -74,7 +74,7 @@ A number of per fight stats including number of knockdowns and significant strik
 
 Before model training, the data was split into train (*n=6860, p=0.75*) and test (*n=2286, 0.25*) sets. The train set will be used to train and optimize the model and the test set will be used to evaluate only the best model.
 
-### ii. Model Selection (Feature Selection & Hyperparameter Tuning)
+### ii. Feature Selection & Hyperparameter Tuning
 
 To find the optimal model, a number of difference machine learning algorithmns were tested. For each model, a pipeline was created to scale the data, select the k best features (where k is a hyperparameter to be optimized), and perform hyperparamater tuning. To perform hyperparameter tuning, the pipeline was subject to 3-fold cross validation, attempting to find the paramaters that maximized accuracy.
 
