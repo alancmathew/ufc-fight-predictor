@@ -10,13 +10,11 @@
 
 ***[2. Feature Engineering](#2-fe)***
 
-***[3. Model Training & Evaluation](#3-model)***
+***[3. Model Selection](#3-model)***
 
-***[4. Final Results](#4-results)***
+***[4. Results](#4-results)***
 
 ***[Conclusion](#conclusion)***
-
-***[Appendix: Exploratory Analysis](#appendix)***
 
 ***[Sources](#sources)***
 
@@ -70,7 +68,7 @@ Another measure of recent performance that was added is a fighter's winning or l
 
 A number of per fight stats including number of knockdowns and significant strikes were also available. Using that, cumulative means of these fight stats were created to reflect each fighter's average performance up till the date of each fight.
 
-## 3. Model Training & Evaluation <a name="3-model" href="#toc">^</a>
+## 3. Model Selection <a name="3-model" href="#toc">^</a>
 
 ### i. Train/Test Split
 
@@ -82,7 +80,120 @@ To find the optimal model, a number of difference machine learning algorithmns w
 
 The best model was a **Logistic Regression** model with **360** **features**, which had a 5-fold cross validated accuracy of: **0.6089** (60.89%).
 
-### iii. Evaluation
+## 4. Results <a name="4-results" href="#toc">^</a>
+
+### i. Feature Importances
+
+Looking at the coefficients of the Logistic Regression model, these features seem to be some of the most important one:
+
+<table class="dataframe" border="1">
+  <thead>
+    <tr>
+      <th>feature</th>
+      <th>feature_coef</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>opponent_age</th>
+      <td>1.499032</td>
+    </tr>
+    <tr>
+      <th>fighter_reach_inches</th>
+      <td>1.068637</td>
+    </tr>
+    <tr>
+      <th>fighter_win_streak</th>
+      <td>0.85252</td>
+    </tr>
+    <tr>
+      <th>fighter_rollsum10_wins</th>
+      <td>0.828116</td>
+    </tr>
+    <tr>
+      <th>opponent_method_decision_split_wins</th>
+      <td>0.779593</td>
+    </tr>
+    <tr>
+      <th>opponent_rollsum3_losses</th>
+      <td>0.658653</td>
+    </tr>
+    <tr>
+      <th>opponent_rollsum3_wins</th>
+      <td>0.631909</td>
+    </tr>
+    <tr>
+      <th>fighter_cumsum_winrate</th>
+      <td>0.516765</td>
+    </tr>
+    <tr>
+      <th>fighter_rollsum20_winrate</th>
+      <td>0.497244</td>
+    </tr>
+    <tr>
+      <th>opponent_cumsum_round3_winrate</th>
+      <td>0.489205</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>fighter_cumsum_round3_winrate</th>
+      <td>-0.489205</td>
+    </tr>
+    <tr>
+      <th>opponent_rollsum20_winrate</th>
+      <td>-0.497244</td>
+    </tr>
+    <tr>
+      <th>opponent_cumsum_winrate</th>
+      <td>-0.516765</td>
+    </tr>
+    <tr>
+      <th>fighter_rollsum3_wins</th>
+      <td>-0.631909</td>
+    </tr>
+    <tr>
+      <th>fighter_rollsum3_losses</th>
+      <td>-0.658653</td>
+    </tr>
+    <tr>
+      <th>fighter_method_decision_split_wins</th>
+      <td>-0.779593</td>
+    </tr>
+    <tr>
+      <th>opponent_rollsum10_wins</th>
+      <td>-0.828116</td>
+    </tr>
+    <tr>
+      <th>opponent_win_streak</th>
+      <td>-0.85252</td>
+    </tr>
+    <tr>
+      <th>opponent_reach_inches</th>
+      <td>-1.068637</td>
+    </tr>
+    <tr>
+      <th>fighter_age</th>
+      <td>-1.499032</td>
+    </tr>
+  </tbody>
+</table>
+
+**Age**
+
+- A fighter's age seems to be the feature that has the largest negative impact on their chances of winning. So, the younger fighter is more likely to win. After calculating, the younger fighter is has a **57.71%** chance of winning.
+
+**Reach**
+
+- Another important variable is the fighter's reach, which seems to have a positive impact on the chances of winning. The fighter with the longer reach can reach their opponent, without they themselves getting hit. From the data, the fighter with the longer reach has a **52.47%** chance of winning.
+
+**Win streak & Rolling sums of wins/winrates**
+
+- It seems quite obvious that a good predictor of a fighter's current performance is their past performance, and this is reflected in the feature importances as variables such as win streak, rolling sums of wins and winrates seem to have a positive impact of the fighter's chances of winning.
+
+### ii. Model Evaluation
 
 After having selected the best model, it was then evaluated using the train and test sets, which yielded the following confusion matrices:  
 
@@ -122,11 +233,32 @@ And produced the following table of metrics:
 
 Thus, based on unseen data, the model seems to have an accuracy of **0.6234** (62.34%).
 
-### iv. Re-train
+### iii. Re-train
 
 After evaluating the model with the test set, the model was re-trained using all the available data (train + test sets).
 
+### iv. Further Improvements
+
+To improve the performance of the model, more feature engineering can be performed to add certain features:
+
+- ELO Rating
+  
+  - An overall measure of a fighter's past performance  
+
+> A player's Elo rating is represented by a number which may change depending on the outcome of rated games played. After every game, the winning player takes points from the losing one. The difference between the ratings of the winner and loser determines the total number of points gained or lost after a game.
+> 
+> Source: [Elo rating system - Wikipedia](https://en.wikipedia.org/wiki/Elo_rating_system)
+
+- Product & squared variables
+  
+  - New features that are the products or squares of existing features can be added to gain prediction power from features that work in combination or features whose squares are linearly correlated with the taget. However, doing so will require much greater computing power as the number of features will grow exponentially.
+
+## Conclusion
+
+Starting out with the goal of creating a model with a higher degree of accuracy than the baseline, this project has been successful as the final model has an accuracy of **0.6234** (62.34%), a **0.1234** (12.34%) increase from the baseline.
+
 ## Sources <a name="sources" href="#toc">^</a>
 
-- https://c4.wallpaperflare.com/wallpaper/556/917/227/arts-b-w-battle-battles-wallpaper-preview.jpg
 - http://ufcstats.com/
+- https://en.wikipedia.org/wiki/Elo_rating_system
+- https://c4.wallpaperflare.com/wallpaper/556/917/227/arts-b-w-battle-battles-wallpaper-preview.jpg
