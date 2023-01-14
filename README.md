@@ -253,7 +253,7 @@ To improve the performance of the model, more feature engineering can be perform
   
   - New features that are the products or squares of existing features can be added to gain prediction power from features that work in combination or features whose squares are linearly correlated with the taget. However, doing so will require much greater computing power as the number of features will grow exponentially.
 
-## Conclusion
+## Conclusion <a name="conclusion" href="#toc">^</a>
 
 Starting out with the goal of creating a model with a higher degree of accuracy than the baseline, this project has been successful as the final model has an accuracy of **0.6234** (62.34%), a **0.1234** (12.34%) increase from the baseline.
 
